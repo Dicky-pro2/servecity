@@ -1,0 +1,444 @@
+// src/pages/client/Bookings.jsx
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+
+const MOCK_BOOKINGS = [
+  {
+    id: 1,
+    service: "Electrical Installation",
+    serviceId: 101,
+    provider: "James Okafor",
+    providerInitials: "JO",
+    providerColor: "#1A73E8",
+    providerPhone: "+2348012345678",
+    date: "2024-03-28",
+    time: "10:00 AM",
+    status: "pending",
+    price: "₦15,000",
+    location: "Lagos Island",
+    description: "Complete electrical wiring for new apartment",
+    images: null,
+    createdAt: "2024-03-25"
+  },
+  {
+    id: 2,
+    service: "AC Repair",
+    serviceId: 102,
+    provider: "Mike Adeyemi",
+    providerInitials: "MA",
+    providerColor: "#7C3AED",
+    providerPhone: "+2348012345679",
+    date: "2024-03-25",
+    time: "2:00 PM",
+    status: "completed",
+    price: "₦25,000",
+    location: "Ikeja, Lagos",
+    description: "Split AC repair and maintenance",
+    images: null,
+    completedAt: "2024-03-25",
+    rating: 5,
+    review: "Excellent service! Very professional and quick."
+  },
+  {
+    id: 3,
+    service: "Plumbing Service",
+    serviceId: 103,
+    provider: "Emeka Nwosu",
+    providerInitials: "EN",
+    providerColor: "#DC2626",
+    providerPhone: "+2348012345680",
+    date: "2024-03-30",
+    time: "9:00 AM",
+    status: "confirmed",
+    price: "₦8,000",
+    location: "Port Harcourt",
+    description: "Leaking pipe repair in kitchen",
+    images: null,
+    createdAt: "2024-03-26"
+  },
+  {
+    id: 4,
+    service: "Smart Home Setup",
+    serviceId: 104,
+    provider: "TechGenius",
+    providerInitials: "TG",
+    providerColor: "#9333EA",
+    providerPhone: "+2348012345681",
+    date: "2024-04-02",
+    time: "11:00 AM",
+    status: "pending",
+    price: "₦35,000",
+    location: "Victoria Island",
+    description: "Complete smart home installation including CCTV and automation",
+    images: null,
+    createdAt: "2024-03-27"
+  },
+  {
+    id: 5,
+    service: "Deep Cleaning",
+    serviceId: 105,
+    provider: "Sparkle Cleaners",
+    providerInitials: "SC",
+    providerColor: "#059669",
+    providerPhone: "+2348012345682",
+    date: "2024-03-29",
+    time: "8:00 AM",
+    status: "completed",
+    price: "₦12,000",
+    location: "Lekki, Lagos",
+    description: "Deep cleaning for 3-bedroom apartment",
+    images: null,
+    completedAt: "2024-03-29",
+    rating: 4,
+    review: "Good job, but a bit late. Overall satisfied."
+  }
+];
+
+export default function ClientBookings() {
+  const { isDark } = useTheme();
+  const [filter, setFilter] = useState('all'); // all, pending, confirmed, completed
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
+
+  const filteredBookings = MOCK_BOOKINGS.filter(booking => {
+    if (filter === 'all') return true;
+    return booking.status === filter;
+  });
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'pending':
+        return 'bg-yellow-500/10 text-yellow-600 border-yellow-200 dark:border-yellow-800';
+      case 'confirmed':
+        return 'bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800';
+      case 'completed':
+        return 'bg-green-500/10 text-green-600 border-green-200 dark:border-green-800';
+      default:
+        return 'bg-gray-500/10 text-gray-600';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'pending': return 'Pending';
+      case 'confirmed': return 'Confirmed';
+      case 'completed': return 'Completed';
+      default: return status;
+    }
+  };
+
+  const handleCancelBooking = () => {
+    // In real app, make API call to cancel booking
+    console.log('Cancelling booking:', bookingToCancel);
+    setShowCancelModal(false);
+    setBookingToCancel(null);
+    // Show success message
+    alert('Booking cancelled successfully');
+  };
+
+  const handleSubmitReview = () => {
+    // In real app, make API call to submit review
+    console.log('Submitting review:', reviewData);
+    setShowReviewModal(false);
+    setReviewData({ rating: 5, comment: '' });
+    // Show success message
+    alert('Review submitted successfully!');
+  };
+
+  const handleWhatsAppContact = (phone, service) => {
+    const message = encodeURIComponent(`Hi, I'm contacting you about my ${service} booking on ServeCity.`);
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  };
+
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const stars = [];
+    for (let i = 0; i < fullStars; i++) {
+      stars.push('★');
+    }
+    for (let i = fullStars; i < 5; i++) {
+      stars.push('☆');
+    }
+    return stars.map((star, i) => (
+      <span key={i} className={rating ? 'text-yellow-400' : 'text-gray-300'}>
+        {star}
+      </span>
+    ));
+  };
+
+  return (
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0f0f0f]' : 'bg-[#f7f9ff]'}`}>
+      <Navbar />
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            My Bookings
+          </h1>
+          <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+            Manage all your service bookings in one place
+          </p>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 border-b">
+          {[
+            { value: 'all', label: 'All Bookings', count: MOCK_BOOKINGS.length },
+            { value: 'pending', label: 'Pending', count: MOCK_BOOKINGS.filter(b => b.status === 'pending').length },
+            { value: 'confirmed', label: 'Confirmed', count: MOCK_BOOKINGS.filter(b => b.status === 'confirmed').length },
+            { value: 'completed', label: 'Completed', count: MOCK_BOOKINGS.filter(b => b.status === 'completed').length }
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                filter === tab.value
+                  ? 'border-[#1A73E8] text-[#1A73E8]'
+                  : isDark
+                    ? 'border-transparent text-gray-400 hover:text-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+
+        {/* Bookings List */}
+        {filteredBookings.length === 0 ? (
+          <div className={`text-center py-12 rounded-2xl border ${
+            isDark ? 'bg-[#141414] border-[#222]' : 'bg-white border-gray-100'
+          }`}>
+            <div className="text-6xl mb-4">📭</div>
+            <p className={`text-lg font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              No bookings found
+            </p>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              You haven't made any {filter !== 'all' ? filter : ''} bookings yet
+            </p>
+            <Link
+              to="/client/browse"
+              className="inline-block px-6 py-3 bg-[#1A73E8] text-white rounded-full font-medium hover:bg-blue-700 transition"
+            >
+              Browse Services
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredBookings.map((booking) => (
+              <div
+                key={booking.id}
+                className={`rounded-2xl border p-6 transition-all hover:shadow-lg ${
+                  isDark ? 'bg-[#141414] border-[#222]' : 'bg-white border-gray-100'
+                }`}
+              >
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  {/* Left - Provider Info */}
+                  <div className="flex items-start gap-4 flex-1">
+                    <div
+                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0"
+                      style={{ background: booking.providerColor }}
+                    >
+                      {booking.providerInitials}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {booking.service}
+                        </h2>
+                        <span className={`text-xs px-3 py-1 rounded-full border ${getStatusColor(booking.status)}`}>
+                          {getStatusText(booking.status)}
+                        </span>
+                      </div>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                        {booking.provider} • {booking.location}
+                      </p>
+                      <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'} mb-2`}>
+                        📅 {booking.date} at {booking.time}
+                      </p>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                        {booking.description}
+                      </p>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {booking.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setBookingToCancel(booking);
+                                setShowCancelModal(true);
+                              }}
+                              className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-950 transition"
+                            >
+                              Cancel Booking
+                            </button>
+                            <button
+                              onClick={() => handleWhatsAppContact(booking.providerPhone, booking.service)}
+                              className="px-4 py-2 text-sm font-medium text-green-600 border border-green-300 rounded-full hover:bg-green-50 dark:hover:bg-green-950 transition"
+                            >
+                              💬 Message Provider
+                            </button>
+                          </>
+                        )}
+                        
+                        {booking.status === 'confirmed' && (
+                          <>
+                            <button
+                              onClick={() => handleWhatsAppContact(booking.providerPhone, booking.service)}
+                              className="px-4 py-2 text-sm font-medium text-green-600 border border-green-300 rounded-full hover:bg-green-50 dark:hover:bg-green-950 transition"
+                            >
+                              💬 Contact Provider
+                            </button>
+                            <button className="px-4 py-2 text-sm font-medium text-[#1A73E8] border border-[#1A73E8] rounded-full hover:bg-blue-50 dark:hover:bg-blue-950 transition">
+                              Mark as Completed
+                            </button>
+                          </>
+                        )}
+                        
+                        {booking.status === 'completed' && !booking.rating && (
+                          <button
+                            onClick={() => {
+                              setSelectedBooking(booking);
+                              setShowReviewModal(true);
+                            }}
+                            className="px-4 py-2 text-sm font-medium text-yellow-600 border border-yellow-300 rounded-full hover:bg-yellow-50 dark:hover:bg-yellow-950 transition"
+                          >
+                            ⭐ Leave a Review
+                          </button>
+                        )}
+                        
+                        {booking.status === 'completed' && booking.rating && (
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-0.5">
+                              {renderStars(booking.rating)}
+                            </div>
+                            <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                              Your review
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right - Price */}
+                  <div className="text-right">
+                    <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {booking.price}
+                    </p>
+                    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
+                      Booking ID: #{booking.id}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Cancel Booking Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-md w-full rounded-2xl p-6 ${isDark ? 'bg-[#141414]' : 'bg-white'}`}>
+            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Cancel Booking
+            </h2>
+            <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelBooking}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
+              >
+                Yes, Cancel
+              </button>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                  isDark 
+                    ? 'bg-[#1a1a1a] text-gray-300 hover:bg-[#252525]' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                No, Keep It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-md w-full rounded-2xl p-6 ${isDark ? 'bg-[#141414]' : 'bg-white'}`}>
+            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Leave a Review
+            </h2>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              How was your experience with {selectedBooking?.provider}?
+            </p>
+            
+            {/* Rating Stars */}
+            <div className="flex justify-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setReviewData({ ...reviewData, rating: star })}
+                  className="text-3xl focus:outline-none"
+                >
+                  <span className={star <= reviewData.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                    ★
+                  </span>
+                </button>
+              ))}
+            </div>
+            
+            {/* Review Comment */}
+            <textarea
+              value={reviewData.comment}
+              onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+              placeholder="Share your experience with this provider..."
+              rows="4"
+              className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#1A73E8] mb-4 ${
+                isDark 
+                  ? 'bg-[#0f0f0f] border-[#333] text-white placeholder-gray-500' 
+                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+              }`}
+            />
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleSubmitReview}
+                className="flex-1 px-4 py-2 bg-[#1A73E8] text-white rounded-lg font-medium hover:bg-blue-700 transition"
+              >
+                Submit Review
+              </button>
+              <button
+                onClick={() => setShowReviewModal(false)}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition ${
+                  isDark 
+                    ? 'bg-[#1a1a1a] text-gray-300 hover:bg-[#252525]' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
+    </div>
+  );
+}
